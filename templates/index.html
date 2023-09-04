@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문장 요약 및 긍부정 평가</title>
+</head>
+
+<body>
+    <h1>문장 요약 및 긍부정 평가</h1>
+    <form id="summarize-evaluate-form">
+        <textarea
+                id="input-text"
+                rows="5"
+                cols="50"
+                placeholder="요약 및 긍부정을 확인할 문장을 입력하세요..."
+                oninput="checkInputLength()"
+        ></textarea>
+        <br/>
+        <p id="char_count">0 / 4000자</p>
+        <button type="button" onclick="summarizeAndEvaluate()">요약 및 긍부정 확인</button>
+        <div id="results">
+            <h2 id="summarized-result"></h2>
+            <h2 id="sentiment-result"></h2>
+        </div>
+    </form>
+
+    <script>
+        function checkInputLength() {
+          const textArea = document.getElementById("input-text");
+          const charCount = textArea.value.length;
+          const charCountElement = document.getElementById("char_count");
+
+          if (charCount > 4000) {
+            textArea.value = textArea.value.slice(0, 4000);
+            charCountElement.textContent = "4000 / 4000자";
+            document.getElementById("submit_btn").disabled = true;
+          } else {
+            charCountElement.textContent = charCount + " / 4000자";
+            document.getElementById("submit_btn").disabled = false;
+          }
+        }
+        function summarizeAndEvaluate() {
+            const inputText = document.getElementById("input-text").value;
+            fetch("/summarize_and_evaluate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `input_text=${encodeURIComponent(inputText)}`,
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("summarized-result").textContent = "요약된 문장 결과: " + data.summarized_text;
+                document.getElementById("sentiment-result").textContent = "긍부정 결과: " + data.sentiment;
+            });
+        }
+    </script>
+</body>
+</html>
